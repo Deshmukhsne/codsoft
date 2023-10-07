@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Calculator</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.calculator {
+    max-width: 300px;
+    margin: 0 auto;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+.screen {
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+#display {
+    width: 100%;
+    padding: 5px;
+    font-size: 20px;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+}
+
+button {
+    padding: 10px;
+    font-size: 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.operator {
+    background-color: #007bff;
+    color: #fff;
+}
+    
+    
+    
+</style>
+    </head>
+<body>
+    <div class="calculator">
+        <div class="screen">
+            <input type="text" id="display" readonly>
+        </div>
+        <div class="buttons">
+            <button class="operator" id="clear">C</button>
+            <button id="7">7</button>
+            <button id="8">8</button>
+            <button id="9">9</button>
+            <button class="operator" id="divide">/</button>
+            <button id="4">4</button>
+            <button id="5">5</button>
+            <button id="6">6</button>
+            <button class="operator" id="multiply">*</button>
+            <button id="1">1</button>
+            <button id="2">2</button>
+            <button id="3">3</button>
+            <button class="operator" id="subtract">-</button>
+            <button id="0">0</button>
+            <button id="decimal">.</button>
+            <button class="operator" id="calculate">=</button>
+            <button class="operator" id="add">+</button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const display = document.getElementById('display');
+    const buttons = document.querySelectorAll('button');
+
+    let currentInput = '';
+    let currentOperator = '';
+    let firstOperand = null;
+    let waitingForSecondOperand = false;
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const value = button.textContent;
+
+            if (value === 'C') {
+                clearCalculator();
+            } else if (isNumber(value)) {
+                if (waitingForSecondOperand) {
+                    currentInput = value;
+                    waitingForSecondOperand = false;
+                } else {
+                    currentInput += value;
+                }
+                updateDisplay();
+            } else if (isOperator(value)) {
+                if (firstOperand === null) {
+                    firstOperand = parseFloat(currentInput);
+                    currentOperator = value;
+                    waitingForSecondOperand = true;
+                } else {
+                    const result = operate(currentOperator, firstOperand, parseFloat(currentInput));
+                    currentInput = result.toString();
+                    firstOperand = result;
+                    currentOperator = value;
+                    waitingForSecondOperand = true;
+                    updateDisplay();
+                }
+            } else if (value === '=') {
+                if (firstOperand !== null) {
+                    const result = operate(currentOperator, firstOperand, parseFloat(currentInput));
+                    currentInput = result.toString();
+                    firstOperand = null;
+                    currentOperator = '';
+                    waitingForSecondOperand = false;
+                    updateDisplay();
+                }
+            } else if (value === '.') {
+                if (!currentInput.includes('.')) {
+                    currentInput += '.';
+                    updateDisplay();
+                }
+            }
+        });
+    });
+
+    function isNumber(value) {
+        return !isNaN(value) && isFinite(value);
+    }
+
+    function isOperator(value) {
+        return ['+', '-', '*', '/'].includes(value);
+    }
+
+    function operate(operator, a, b) {
+        switch (operator) {
+            case '+':
+                return a + b;
+            case '-':
+                return a - b;
+            case '*':
+                return a * b;
+            case '/':
+                if (b === 0) {
+                    return 'Error';
+                }
+                return a / b;
+            default:
+                return b;
+        }
+    }
+
+    function clearCalculator() {
+        currentInput = '';
+        currentOperator = '';
+        firstOperand = null;
+        waitingForSecondOperand = false;
+        display.value = '0';
+    }
+
+    function updateDisplay() {
+        display.value = currentInput;
+    }
+});
+
+    </script>
+</body>
+</html>
